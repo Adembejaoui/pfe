@@ -1,0 +1,167 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  directUrl  = env("DIRECT_URL")
+}
+
+// ===== ENUMS =====
+
+enum Role {
+  CLIENT
+  BOOSTER
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+// ===== MODELS =====
+
+model User {
+  id              Int       @id @default(autoincrement())
+  email           String    @unique
+  password        String
+  username        String?
+  role            Role      @default(CLIENT)
+  emailVerified   Boolean   @default(false)
+  verificationToken         String?
+  verificationTokenExpiry   DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  // Relations
+  ordersAsClient  Order[]   @relation("ClientOrders")
+  ordersAsBooster Order[]   @relation("BoosterOrders")
+  messages        Message[] @relation("UserMessages")
+  reviews         Review[]  @relation("UserReviews")
+
+  BoosterRequest BoosterRequest[]
+
+  UserNotification UserNotification[]
+
+  PasswordResetToken PasswordResetToken[]
+}
+model PasswordResetToken {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  used      Boolean  @default(false)
+
+  @@index([token])
+  @@index([userId])
+}
+
+enum BoosterRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model BoosterRequest {
+  id          Int                 @id @default(autoincrement())
+  userId      Int
+  bio         String              @db.Text
+  skills      String              @db.Text
+  experience  String              @db.Text
+  attributes  Json                // Store additional attributes as JSON
+  status      BoosterRequestStatus @default(PENDING)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  
+  // Relations
+  user        User                @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([status])
+}
+
+
+model Game {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  slug        String    @unique // Adding slug for URL-friendly identifiers
+  description String?
+  imageUrl    String?
+  attributes  Json?     // Stores game-specific attributes
+  gameTypes   Json?     // Stores game types as JSON instead of a separate model
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  orders      Order[]
+}
+
+model Order {
+  id               Int         @id @default(autoincrement())
+  gameId           Int
+  gameTypeId       String      // Changed to String since it will now be an ID from the JSON
+  clientId         Int
+  boosterId        Int?
+  status           OrderStatus @default(PENDING)
+  attributes       Json?
+  price            Float
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  // Relations
+  game             Game        @relation(fields: [gameId], references: [id])
+  client           User        @relation("ClientOrders", fields: [clientId], references: [id])
+  booster          User?       @relation("BoosterOrders", fields: [boosterId], references: [id])
+  messages         Message[]
+  review           Review?
+}
+
+model Message {
+  id        Int      @id @default(autoincrement())
+  content   String
+  createdAt DateTime @default(now())
+  isAI      Boolean  @default(false)
+
+  // Relations
+  order     Order    @relation(fields: [orderId], references: [id])
+  orderId   Int
+  sender    User     @relation("UserMessages", fields: [senderId], references: [id])
+  senderId  Int
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+
+  // Relations
+  order     Order    @relation(fields: [orderId], references: [id])
+  orderId   Int      @unique
+  author    User     @relation("UserReviews", fields: [authorId], references: [id])
+  authorId  Int
+}
+model UserNotification {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  type      String   // BOOSTER_APPROVAL, BOOSTER_REJECTION, etc.
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  user      User     @relation(fields: [userId], references: [id])
+  
+  // Unique constraint to prevent duplicate notifications of the same type
+  @@unique([userId, type])
+  @@index([userId])
+  @@index([type])
+  @@index([read])
+}
