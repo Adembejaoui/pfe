@@ -24,7 +24,7 @@ export default function BoostOrderPage() {
   const router = useRouter()
   const gameType = getRouteParam(params, "gameType")
   const boostType = getRouteParam(params, "boostType")
-  const { data: session, status } = useSession()
+
 
   // State for game and boost type data
   const [gameConfig, setGameConfig] = useState<any>(null)
@@ -274,6 +274,11 @@ export default function BoostOrderPage() {
           lp: currentRank.lp || 0,
         }
       }
+      orderAttributes.actualRank = {
+          ...orderAttributes.currentRank,
+          lastUpdated: new Date().toISOString(),
+        }
+      
 
       // Add attributes based on boost type
       const boostTypeSlug = boostTypeConfig.slug || ""
@@ -283,6 +288,8 @@ export default function BoostOrderPage() {
         orderAttributes.desiredRank = {
           tier: desiredRank.tier,
           division: desiredRank.division || "",
+
+          
         }
       }
 
@@ -492,7 +499,7 @@ export default function BoostOrderPage() {
               <div>
                 <OrderSummary
                   gameConfig={gameConfig}
-                  boostType={boostType}
+                  boostType={boostType || ""} 
                   currentRank={boostTypeConfig.options?.currentRank ? currentRank : undefined}
                   desiredRank={boostTypeConfig.options?.desiredRank ? desiredRank : undefined}
                   wins={boostTypeConfig.options?.wins ? wins : undefined}

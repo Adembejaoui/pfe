@@ -4,7 +4,6 @@ import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/lib/auth"
 import { OrderInformation } from "@/components/order/order-information"
 import { LoginInformation } from "@/components/order/login-information"
-import { OrderProgress } from "@/components/order/order-progress"
 import { MatchHistory } from "@/components/order/match-history"
 import { UserStatus } from "@/components/order/user-status"
 import type { Prisma } from "@prisma/client"
@@ -14,11 +13,14 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { ArrowLeft, Clock, Shield } from "lucide-react"
 import Link from "next/link"
+import { OrderCompleteHandler } from "@/components/order/order-complete-handler"
+import { OrderProgress } from "@/components/order/order-progress"
 
 interface OrderPageProps {
   params: {
     orderId: string
   }
+  searchParams: { [key: string]: string | string[] | undefined }
 }
 
 // Define types for our order data with relations
@@ -75,6 +77,7 @@ async function getOrderData(orderId: number): Promise<{ order: OrderWithRelation
             username: true,
             email: true,
             role: true,
+           
           },
         },
         messages: {
@@ -110,7 +113,7 @@ function isBoosterOnline(lastActive: Date | null): boolean {
   return lastActive > fiveMinutesAgo
 }
 
-export default async function OrderPage({ params }: OrderPageProps) {
+export default async function OrderPage({ params, searchParams }: OrderPageProps) {
   const orderIdNum = Number(params.orderId)
   if (isNaN(orderIdNum)) notFound()
 
@@ -223,13 +226,14 @@ export default async function OrderPage({ params }: OrderPageProps) {
       </div>
     )
   }
+
   let dashboardRole
-  if(session?.user.role =="CLIENT"){
-     dashboardRole = `/dashboard/Client/orders/active`
-  }else{
-     dashboardRole = `/dashboard/Booster/orders/available`
+  if (session?.user.role == "CLIENT") {
+    dashboardRole = `/dashboard/Client/orders/active`
+  } else {
+    dashboardRole = `/dashboard/Booster/orders/available`
   }
- 
+
   return (
     <div className="w-full bg-[#0F1118] min-h-screen text-gray-100">
       {/* Header with back button and order ID */}
@@ -262,6 +266,17 @@ export default async function OrderPage({ params }: OrderPageProps) {
           </div>
         </div>
       </div>
+
+      {/* Post-Order Modal Handler - Only show for clients */}
+      {isClient && (
+        <OrderCompleteHandler
+          orderId={order.id}
+          boosterId={order.boosterId}
+          clientId={order.clientId}
+          status={order.status}
+          hasReview={!!order.review}
+        />
+      )}
 
       <div className="container mx-auto px-4 py-6">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
@@ -312,6 +327,7 @@ export default async function OrderPage({ params }: OrderPageProps) {
           {/* Bottom Section - Order Progress */}
           <div className="md:col-span-12">
             <OrderProgress
+              actualRank={attributes.actualRank || {}}
               currentRank={attributes.currentRank || {}}
               desiredRank={attributes.desiredRank || {}}
               orderId={orderIdNum}
@@ -324,6 +340,8 @@ export default async function OrderPage({ params }: OrderPageProps) {
                 tagLine: attributes.playerData?.tagLine,
                 server: attributes.server,
               }}
+              attributes={attributes}
+              order={order}
             />
           </div>
 
@@ -335,7 +353,7 @@ export default async function OrderPage({ params }: OrderPageProps) {
                 tagLine: attributes.playerInfo?.tagLine,
                 server: attributes.server,
               }}
-              gameType={order.game?.name || "lol"} // Pass the game type from the order
+              gameType={order.game?.name || "league of legend"} // Pass the game type from the order
             />
           </div>
         </div>

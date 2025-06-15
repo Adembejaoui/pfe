@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { db, parseOrderAttributes } from "@/lib/db"
+import { db } from "@/lib/db"
+import { JsonObject, JsonArray } from "@prisma/client/runtime/library"
 
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
@@ -113,3 +114,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     return NextResponse.json({ error: "Failed to update order" }, { status: 500 })
   }
 }
+function parseOrderAttributes(attributes: string | number | boolean | JsonObject | JsonArray | null, arg1: {}) {
+  throw new Error("Function not implemented.")
+}
+

@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { db, parseGameTypes } from "@/lib/db"
+import { $Enums, Prisma } from "@prisma/client"
 
 export async function GET(request: NextRequest) {
   try {
@@ -8,11 +9,11 @@ export async function GET(request: NextRequest) {
     let totalGames = 0
     let totalOrders = 0
     let totalRevenue = 0
-    let usersByRole = []
-    let ordersByStatus = []
-    let recentOrders = []
-    let topGames = []
-    let topBoosters = []
+    let usersByRole: (Prisma.PickEnumerable<Prisma.UserGroupByOutputType, "role"[]> & { _count: { id: number } })[] = []
+    let ordersByStatus: { _sum: { price: number }; status: $Enums.OrderStatus; _count: { id: number } }[] = []
+    let recentOrders: { price: number; gameType: { name: any } | null; client: { email: string; username: string | null }; game: { name: string; gameTypes: Prisma.JsonValue }; booster: { email: string; username: string | null } | null; id: number; createdAt: Date; updatedAt: Date; gameId: number; gameTypeId: string; clientId: number; boosterId: number | null; status: $Enums.OrderStatus; attributes: Prisma.JsonValue | null }[] = []
+    let topGames: ({ _count: { orders: number } } & { id: number; createdAt: Date; updatedAt: Date; name: string; attributes: Prisma.JsonValue | null; slug: string; description: string | null; imageUrl: string | null; gameTypes: Prisma.JsonValue | null })[] = []
+    let topBoosters: ({ _count: { ordersAsBooster: number } } & { role: $Enums.Role; id: number; email: string; password: string; username: string | null; emailVerified: boolean; verificationToken: string | null; verificationTokenExpiry: Date | null; createdAt: Date; updatedAt: Date })[] = []
 
     try {
       totalUsers = await db.user.count()

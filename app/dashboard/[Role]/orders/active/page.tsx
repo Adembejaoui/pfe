@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Loader2 } from 'lucide-react'
 import { OrdersTable } from "@/components/elements/DataTable/orders-table"
 import { useSession } from "next-auth/react"
+import { useSearchParams } from "next/navigation"
 
 // Loading component for Suspense
 function OrdersLoading() {
@@ -21,12 +22,14 @@ export default function OrdersPage({ params }: { params: { role: string } }) {
   // Validate role
   const { data: session, status } = useSession()
   const userRole = session?.user?.role
+  const searchParams = useSearchParams()
+  const tab = searchParams.get("tab") || "active"
 
   return (
-    <div className="container mx-auto py-6">
+    <div className="container mx-auto p-6">
       <h1 className="text-2xl font-bold mb-6">Orders</h1>
 
-      <Tabs defaultValue="active" className="w-full">
+      <Tabs defaultValue={tab} className="w-full">
         <TabsList className="mb-4">
           <TabsTrigger value="active">Active</TabsTrigger>
           <TabsTrigger value="completed">Completed</TabsTrigger>
@@ -69,7 +72,8 @@ export default function OrdersPage({ params }: { params: { role: string } }) {
                 <OrdersTable 
                   role={role} 
                   status={["COMPLETED"]} 
-                  showClaimButton={false} 
+                  showClaimButton={false}
+                  enableRowClick={false}
                 />
               </Suspense>
             </CardContent>

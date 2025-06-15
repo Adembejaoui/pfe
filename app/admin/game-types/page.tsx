@@ -391,7 +391,7 @@ export default function GameTypesPage() {
             <AlertDialogAction
               onClick={handleDeleteGameType}
               className="bg-red-600 hover:bg-red-700"
-              disabled={isDeleting || (gameTypeToDelete && gameTypeToDelete._count.orders > 0)}
+              disabled={isDeleting || (gameTypeToDelete && gameTypeToDelete._count.orders > 0)|| false} 
             >
               {isDeleting ? "Deleting..." : "Delete"}
             </AlertDialogAction>

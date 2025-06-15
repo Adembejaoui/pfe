@@ -514,13 +514,7 @@ export function RealTimeChat({ orderId, initialMessages, currentUser, boosterOnl
 
             return (
               <div key={`group-${groupIndex}`}>
-                {showDate && (
-                  <div className="flex justify-center my-4">
-                    <div className="bg-[#1E2230] px-3 py-1 rounded-full text-xs text-gray-400">
-                      {format(firstMessageDate, "MMMM d, yyyy")}
-                    </div>
-                  </div>
-                )}
+               
 
                 <div className={`flex ${isCurrentUser ? "justify-end" : "justify-start"}`}>
                   <div

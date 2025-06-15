@@ -2,7 +2,7 @@
 
 import type * as React from "react"
 import { useSession } from "next-auth/react"
-import { PieChart, LifeBuoy, Gamepad, Clock, Users } from "lucide-react"
+import { PieChart, LifeBuoy, Gamepad, Clock, Users, Home} from "lucide-react"
 
 import { NavProjects } from "@/components/nav-projects"
 import { NavUser } from "@/components/nav-user"
@@ -16,7 +16,9 @@ const roleNavigation = {
   CLIENT: {
     mainNav: [
       { name: "Active Order", url: "/dashboard/Client/orders/active", icon: Clock },
-      { name: "Profile", url: "/dashboard/Client/profile", icon: Users },
+      { name: "Home", url: "/", icon: Home },
+      { name: "Upgrade your account", url: "/gameboost", icon: Gamepad},
+      
     ],
   },
   BOOSTER: {

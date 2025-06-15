@@ -64,30 +64,6 @@ export function ForgotPasswordForm() {
       setIsLoading(false)
     }
   }
-
-  const testSmtpConnection = async () => {
-    setIsLoading(true)
-    try {
-      const response = await fetch("/api/test-email", {
-        method: "GET",
-      })
-
-      const result = await response.json()
-
-      if (!response.ok) {
-        throw new Error(result.error || "Une erreur est survenue lors du test de connexion SMTP")
-      }
-
-      toast.success("Connexion au serveur SMTP établie avec succès")
-      console.log("Résultat du test SMTP:", result)
-    } catch (error) {
-      console.error("Erreur lors du test de connexion SMTP:", error)
-      toast.error("Échec de la connexion au serveur SMTP. Vérifiez les logs du serveur.")
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
   if (isSubmitted) {
     return (
       <div className="space-y-4 text-center">

@@ -43,11 +43,15 @@ export default function DashboardPage({ params }: { params: { Role: string } }) 
       if (userRole && userRole !== params.Role) {
         router.push(`/dashboard/${userRole}`)
       }
+      if(userRole =="ADMIN"){
+        router.push(`/admin`)
+      }
 
       setLoading(false)
     } else if (status === "unauthenticated") {
       router.push("/authentification")
     }
+    
   }, [status, session, params.Role, router])
 
   if (status === "loading" || loading) {

@@ -1,9 +1,9 @@
-import Navbar from '@/components/elements/Navbar'
 import React from 'react'
 import MainLayout from './Mainlayout'
-import { Hero } from '@/components/elements/Hero'
-import FeatureCarousel from '@/components/elements/FeatureCarousel'
-import Marque from '@/components/elements/Marque'
+import GamingHero from '@/components/elements/GamingHero'
+import LiveStats from '@/components/elements/LiveStats'
+import GamingServices from '@/components/elements/GamingServices'
+import ClientReviews from '@/components/elements/ClientReviews'
 
 
 
@@ -11,9 +11,10 @@ const page =  () => {
   
   return (
     <MainLayout>
-      <Hero />
-      <FeatureCarousel />
-      <Marque />
+      <GamingHero />
+      <LiveStats />
+      <GamingServices />
+      <ClientReviews />
     </MainLayout>
     
   )

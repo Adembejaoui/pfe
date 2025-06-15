@@ -62,7 +62,7 @@ export default async function GameBoostTypePage({ params }: GameBoostTypePagePro
 
         {/* Overlay content */}
         <div className="relative z-10 p-6">
-          <Link href="/gameboost" className="inline-flex items-center text-blue-400 hover:text-blue-300 mb-6">
+          <Link href="/gameboost" className="inline-flex items-center text-violet-950/90 hover:text-blue-300 mb-6">
             ← Back to Games
           </Link>
 
@@ -74,11 +74,11 @@ export default async function GameBoostTypePage({ params }: GameBoostTypePagePro
                 <Link
                   key={boostType.id}
                   href={`/gameboost/${gameType}/${boostType.slug}`}
-                  className="bg-[#1a1a2e] border border-[#333355] rounded-lg p-6 hover:border-blue-500 transition-colors"
+                  className="bg-[#1a1a2e] border border-violet-400 rounded-lg p-6 hover:border-violet-950/90 transition-colors"
                 >
                   <h2 className="text-xl font-bold mb-2">{boostType.name}</h2>
                   {boostType.description && <p className="text-gray-400 mb-4">{boostType.description}</p>}
-                  <div className="text-blue-400">View Options →</div>
+                  <div className="text-violet-400">View Options →</div>
                 </Link>
               ))}
             </div>

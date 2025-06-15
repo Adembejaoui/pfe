@@ -3,38 +3,49 @@ import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 
 export async function middleware(req: NextRequest) {
-  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-  const pathname = req.nextUrl.pathname;
+  try {
+    const token = await getToken({ 
+      req, 
+      secret: process.env.NEXTAUTH_SECRET 
+    });
 
-  console.log("Token:", token);
-  console.log("Requested Path:", pathname);
+    const pathname = req.nextUrl.pathname;
 
-  // 🔐 Redirect to /authentication if the user is not logged in
-  /*if (!token || !token.role) {
-    console.log("🚫 Unauthenticated - Redirecting to /authentification");
-    return NextResponse.redirect(new URL("/authentification", req.url));
-  }*/
+    console.log("Token:", token);
+    console.log("Token role:", token?.role);
+    console.log("Requested Path:", pathname);
 
-  // ✅ Extract the role from the URL (third segment in "/dashboard//{role}/*")
-  const pathSegments = pathname.split("/");
-  const requestedRole = null//pathSegments[3]?.toUpperCase(); // Convert to uppercase
-  const userRole = token?.role?.toUpperCase()// Convert to uppercase
-
-  console.log("Logged-in Role:", userRole);
-  console.log("Requested Role:", requestedRole);
-
-  // 🚫 If trying to access "/dashboard//{role}/*", enforce role-based restriction
-  if (pathname.startsWith("/dashboard/") && requestedRole) {
-    if (requestedRole !== userRole) {
-      console.log("🚫 Access denied - Role mismatch:", { loggedIn: userRole, requested: requestedRole });
-      return NextResponse.redirect(new URL("/unauthorized", req.url));
+    if (!token) {
+      console.log("🚫 No token found - Redirecting to /authentification");
+      return NextResponse.redirect(new URL("/authentification", req.url));
     }
-  }
+    // Extract the role from the URL
+    const pathSegments = pathname.split("/");
+    const requestedRole = pathSegments[2]?.toUpperCase();
+    const userRole = token.role?.toUpperCase();
 
-  return NextResponse.next();
+    console.log("User Role:", userRole);
+    console.log("Requested Role:", requestedRole);
+
+      if (pathname.startsWith("/admin") && (userRole !== "ADMIN")) {
+        console.log("🚫 Access denied to /admin - User role:", userRole)
+        return NextResponse.redirect(new URL("/unauthorized", req.url))
+    }
+    // Role-based access control
+    if (pathname.startsWith("/dashboard/") && requestedRole && userRole) {
+      if (requestedRole !== userRole) {
+        console.log("🚫 Access denied - Role mismatch");
+        return NextResponse.redirect(new URL("/unauthorized", req.url));
+      }
+    }
+
+    return NextResponse.next();
+  } catch (error) {
+    console.error("Middleware error:", error);
+    return NextResponse.redirect(new URL("/authentification", req.url));
+  }
 }
 
-// 🔥 Apply middleware to all "/dashboard" routes
 export const config = {
-  //matcher: ["/dashboard/:path*", "/dashboard/:path/:role/:path*"],
+  matcher: ["/dashboard/:path*", "/admin/:path*"],
 };

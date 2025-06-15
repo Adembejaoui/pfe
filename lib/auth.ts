@@ -10,10 +10,6 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
   },
-  jwt: {
-    secret: process.env.JWT_SECRET,
-    maxAge: 60 * 60 * 24 * 30,
-  },
   pages: {
     signIn: "/authentification",
   },
@@ -26,25 +22,33 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials || !credentials.email || !credentials.password) {
-          throw new Error("Email et mot de passe requis")
+          return null
         }
 
-        const existUser = await db.user.findUnique({ where: { email: credentials.email } })
+        try {
+          const existUser = await db.user.findUnique({ 
+            where: { email: credentials.email } 
+          })
 
-        if (!existUser) {
-          throw new Error("Utilisateur non trouvé")
-        }
+          if (!existUser) {
+            return null
+          }
 
-        const passwordMatch = await compare(credentials.password, existUser.password)
-        if (!passwordMatch) {
-          throw new Error("Mot de passe incorrect")
-        }
+          const passwordMatch = await compare(credentials.password, existUser.password)
+          if (!passwordMatch) {
+            return null
+          }
 
-        return {
-          id: existUser.id.toString(),
-          email: existUser.email,
-          username: existUser.username,
-          role: existUser.role,
+          // Return user object matching the extended User type
+          return {
+            id: existUser.id.toString(),
+            email: existUser.email,
+            username: existUser.username || undefined, // Convert null to undefined
+            role: existUser.role,
+          }
+        } catch (error) {
+          console.error("Auth error:", error)
+          return null
         }
       },
     }),
@@ -55,7 +59,7 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id
         token.username = user.username
-        token.email = user.email
+        token.email = user.email!
         token.role = user.role
       }
 
@@ -67,10 +71,10 @@ export const authOptions: NextAuthOptions = {
       return token
     },
     async session({ session, token }) {
-      if (session.user) {
+      if (session.user && token) {
         session.user.id = token.id
         session.user.username = token.username
-        session.user.email = token.email
+        session.user.email = token.email!
         session.user.role = token.role
       }
       return session
@@ -80,14 +84,17 @@ export const authOptions: NextAuthOptions = {
     async signIn({ user }) {
       // Ensure we have the latest role from the database
       if (user.id) {
-        const dbUser = await db.user.findUnique({
-          where: { id: Number.parseInt(user.id.toString()) },
-          select: { role: true },
-        })
+        try {
+          const dbUser = await db.user.findUnique({
+            where: { id: Number.parseInt(user.id.toString()) },
+            select: { role: true },
+          })
 
-        if (dbUser && user.role !== dbUser.role) {
-          // Update the user object with the latest role
-          user.role = dbUser.role
+          if (dbUser && user.role !== dbUser.role) {
+            user.role = dbUser.role
+          }
+        } catch (error) {
+          console.error("Error fetching user role:", error)
         }
       }
     },

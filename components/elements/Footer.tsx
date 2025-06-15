@@ -5,19 +5,23 @@
  */
 import { MountainIcon, ShieldCheck } from "lucide-react"
 import Link from "next/link"
-
+import Image from "next/image";
 export default function Component() {
   return (
     <section className=" py-8 md:py-12 bg-[#030303]  text-white/80">
       <div className="container mx-auto grid grid-cols-1 gap-8 px-4 sm:grid-cols-2 md:grid-cols-4 md:px-6 lg:max-w-7xl">
         <div className="flex flex-col items-start gap-4">
           <Link href="#" className="flex items-center gap-2" prefetch={false}>
-            <ShieldCheck className="h-6 w-6" />
+            <Image
+                          src="https://xou955y8kd.ufs.sh/f/zvC4KODelhDMb2PpuB5iFWtAgHVDXY3jywaQ50s2hvOqKm7G" // Replace with your actual logo path
+                          alt="Logo legends boost"
+                          width={200}
+                          height={200}
+                          className="h-6 w-6 object-contain"
+                      />
             <span className="text-lg font-semibold">Legends Boost</span>
           </Link>
-          <p className="text-white/90">
-          Thank you for choosing Us . 
-           </p>
+       
         </div>
         <div className="grid gap-2">
           <h4 className="text-sm font-semibold">Quick Links</h4>

@@ -269,6 +269,10 @@ export default function UsersPage() {
                         <TableCell>{user.username || "-"}</TableCell>
                         <TableCell>
                           <Badge className={getRoleBadgeColor(user.role)}>{user.role}</Badge>
+                          {user.role =="BOOSTER"  &&
+                          <Link href={`/admin/boosters/${user.id}`} className="hover:underline text-blue-600">
+                          </Link>
+                          }
                         </TableCell>
                         <TableCell>{user._count.ordersAsClient}</TableCell>
                         <TableCell>{user._count.ordersAsBooster}</TableCell>
@@ -373,7 +377,7 @@ export default function UsersPage() {
             <AlertDialogAction
               onClick={handleDeleteUser}
               className="bg-red-600 hover:bg-red-700"
-              disabled={isDeleting || (userToDelete && hasOrders(userToDelete))}
+              disabled={isDeleting || (userToDelete && hasOrders(userToDelete))|| false}
             >
               {isDeleting ? "Deleting..." : "Delete"}
             </AlertDialogAction>

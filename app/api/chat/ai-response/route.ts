@@ -57,6 +57,38 @@ async function isBoosterActive(orderId: number): Promise<boolean> {
   }
 }
 
+// Helper function to find or create an AI system user
+async function getOrCreateAISystemUser() {
+  try {
+    // Try to find an existing AI system user
+    let systemUser = await db.user.findFirst({
+      where: {
+        email: "ai-assistant@system.local",
+        role: "ADMIN", // Using ADMIN role for system users
+      },
+    })
+
+    // If no system user exists, create one
+    if (!systemUser) {
+      systemUser = await db.user.create({
+        data: {
+          email: "ai-assistant@system.local",
+          username: "AI Assistant",
+          password: "SYSTEM_USER_" + Date.now(), // Generate a random password
+          role: "ADMIN",
+          emailVerified: true,
+        },
+      })
+      console.log("Created AI system user:", systemUser.id)
+    }
+
+    return systemUser
+  } catch (error) {
+    console.error("Error getting or creating AI system user:", error)
+    throw new Error("Failed to get or create AI system user")
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const { orderId, message, messageHistory } = await req.json()
@@ -144,12 +176,15 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Save the AI message to the database
+    // Get or create the AI system user
+    const aiSystemUser = await getOrCreateAISystemUser()
+
+    // Save the AI message to the database using the AI system user
     const aiMessage = await db.message.create({
       data: {
         content: aiResponse,
         orderId,
-        senderId: order.boosterId || 1, // Use booster ID or fallback to a system user ID
+        senderId: aiSystemUser.id, // Use the AI system user ID
         isAI: true,
       },
       include: {
@@ -182,7 +217,7 @@ export async function POST(req: NextRequest) {
     })
   } catch (error) {
     console.error("Error generating AI response:", error)
-    return new Response(JSON.stringify({ error: "Failed to generate AI response" }), {
+    return new Response(JSON.stringify({ error: "Failed to generate AI response", details: String(error) }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
     })

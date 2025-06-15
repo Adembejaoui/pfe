@@ -5,6 +5,7 @@ import { BarChart3, Users, GamepadIcon, ListTodo, Settings, LogOut, Menu } from 
 
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { getServerSession } from "next-auth"
 
 export const metadata: Metadata = {
   title: "Admin Dashboard",
@@ -16,11 +17,8 @@ interface AdminLayoutProps {
 }
 
 export default async function AdminLayout({ children }: AdminLayoutProps) {
-  // In a real app, you would check the session and redirect if not admin
-  // const session = await getServerSession()
-  // if (!session || session.user.role !== "ADMIN") {
-  //   redirect("/login")
-  // }
+   const session = await getServerSession()
+ 
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -95,6 +93,13 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
             >
               <Users className="h-4 w-4" />
               Users
+            </Link>
+             <Link
+              href="/admin/boosters"
+              className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground hover:text-primary hover:bg-muted transition-colors"
+            >
+              <Users className="h-4 w-4" />
+              Boosters
             </Link>
             <Link
               href="/admin/games"

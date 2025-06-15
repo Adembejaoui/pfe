@@ -1,4 +1,4 @@
-import type { Role, OrderStatus } from "@prisma/client"
+import type { Role, OrderStatus, Prisma } from "@prisma/client"
 
 export interface User {
   id: number
@@ -32,3 +32,35 @@ export interface Order {
   booster?: User
   messages: Message[]
 }
+export type OrderWithRelations = Prisma.OrderGetPayload<{
+  include: {
+    game: true
+    client: {
+      select: {
+        id: true
+        username: true
+        email: true
+        role: true
+      }
+    }
+    booster: {
+      select: {
+        id: true
+        username: true
+        email: true
+        role: true
+        lastActive: true
+      }
+    }
+    messages: {
+      include: {
+        sender: true
+      }
+    }
+    review: {
+      include: {
+        author: true
+      }
+    }
+  }
+}>
